@@ -1,0 +1,168 @@
+class Node:
+    def __init__(self, key=None, next=None):
+        self.key = key
+        self.next = next
+
+
+class LinkedListHeap:
+    def __init__(self):
+        self.head = None
+
+    def parent(self, i):
+        return (i - 1) // 2
+    
+    def parent_node(i):
+        return _get_node(parent(i))
+
+    def left(self, i):
+        return 2 * i + 1
+    
+    def left_node(i):
+        return _get_node(left(i))
+
+    def right(self, i):
+        return 2 * i + 2
+    
+    def right_node(i):
+        return _get_node(right(i))
+    
+    def _find_index(self, node):
+        current = self.head
+        index = 0
+        while current is not None:
+            if current == node:
+                return index
+            current = current.next
+            index += 1
+        return -1
+
+    def _get_node(self, i):
+        current = self.head
+        for _ in range(i):
+            current = current.next
+        return current
+
+    def _swap(self, i, j):
+        node1 = self._get_node(i)
+        node2 = self._get_node(j)
+        node1.key, node2.key = node2.key, node1.key
+
+    def _remove_last(self):
+        current = self.head
+        while current.next is not None:
+            prev = current
+            current = current.next
+        prev.next = None
+
+    def _size(self):
+        """
+        Return the number of nodes in the linked list.
+        Time complexity: O(n), where n is the number of nodes in the linked list.
+        """
+        current = self.head
+        count = 0
+        while current is not None:
+            count += 1
+            current = current.next
+        return count
+
+    def insert(self, key):
+        new_node = Node(key)
+        if self.head is None:
+            self.head = new_node
+            return
+        current = self.head
+        while current.next is not None:
+            current = current.next
+        current.next = new_node
+        i = self._find_index(new_node)
+        while i > 0 and self._get_node(self.parent(i)).key > self._get_node(i).key:
+            self._swap(i, self.parent(i))
+            i = self.parent(i)
+
+    def delMin(self):
+        if self.head is None:
+            return None
+        min_key = self.head.key
+        last_node = self._get_node(self._size() - 1)
+        if self.head == last_node:
+            self.head = None
+            return min_key
+        self.head.key = last_node.key
+        self._remove_last()
+        i = 0
+        while self.left(i) < self._size():
+            smallest = i
+            left = self.left(i)
+            right = self.right(i)
+            if self._get_node(left).key < self._get_node(smallest).key:
+                smallest = left
+            if right < self._size() and self._get_node(right).key < self._get_node(smallest).key:
+                smallest = right
+            if smallest != i:
+                self._swap(i, smallest)
+                i = smallest
+            else:
+                break
+        return min_key
+
+#method1
+if __name__ == '__main__':
+    import random
+    import time
+    import matplotlib.pyplot as plt
+
+
+    def benchmark(n):
+        heap = LinkedListHeap()
+        insert_times = []
+        delmin_times = []
+
+        for i in range(n):
+            start = time.time()
+            heap.insert(random.randint(0, 100))
+            end = time.time()
+            insert_times.append(end - start)
+
+        for i in range(n):
+            start = time.time()
+            heap.delMin()
+            end = time.time()
+            delmin_times.append(end - start)
+
+        return insert_times, delmin_times
+
+
+    insert_times, delmin_times = benchmark(1000)
+
+    plt.plot(insert_times, label="Insert")
+    plt.plot(delmin_times, label="DelMin")
+    plt.xlabel("Number of Operations")
+    plt.ylabel("Time (s)")
+    plt.legend()
+    plt.show()
+    
+#method2
+LH = LinkedListHeap()
+for i in range(2,20000):
+    LH.insert(i)
+import time
+def test():
+    start_time = time.time()
+    LH.delMin()
+    end_time = time.time()
+    print('cost %f second' % (end_time - start_time))
+s = test()
+print(s)
+
+LH = LinkedListHeap()
+for i in range(2,20000):
+    LH.insert(i)
+import time
+def test():
+    start_time = time.time()
+    LH.insert(1)
+    end_time = time.time()
+    print('cost %f second' % (end_time - start_time))
+s = test()
+print(s)
